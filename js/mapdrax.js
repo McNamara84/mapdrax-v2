@@ -1,5 +1,19 @@
 mapboxgl.accessToken = "pk.eyJ1Ijoic2FpbGZpc2hlcyIsImEiOiJja2ZvYW8zZGEwY3hwMzJ0YWM5bmZrZnBpIn0.TNIlKhnJwqVDiS4dkNMpWg";
 var newAxis = -30;
+// Karte komplett abdecken für "Fog of War"
+var mask = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-180, -90],
+      [-180, 90],
+      [180, 90],
+      [180, -90],
+      [-180, -90],
+    ],
+  ],
+};
+// Beschriftungen der Kontinente
 var continents = {
   type: "FeatureCollection",
   features: [
@@ -66,6 +80,61 @@ var states = {
     },
   ],
 };
+// Reiseroute Matt
+var travelPath = {
+  type: "Feature",
+  properties: {
+    name: "Reiseverlauf",
+  },
+  geometry: {
+    type: "LineString",
+    coordinates: [
+      [10, 46.5], // Eisgebirge / MX1
+      [11.342778, 44.493889], // Bolluna / MX2
+      [12.483333, 41.883333], // Rooma / MX3
+      [11.25, 43.783333], // Florenz / MX4
+      [9.186389, 45.4625], // Millan / MX5
+      [8.1, 46.5692623], // Eisgebirge / MX6
+      [6.516667, 46.45], // Kleines Meer / MX7
+      [8.54226, 47.371740], // Züri / MX8
+      [11.574444, 48.139722], // Ethera / MX9
+      [12.37475, 51.340333], // Laabsisch / MX10
+      [13.408333, 52.518611], // Beelinn / MX11
+      [6.956944, 50.938056], // Coellen / MX12
+      [6.083889, 50.775278], // Aarachne / MX13
+      [2.351667, 48.856667], // Parii / MX14
+      [4.363056, 50.843333], // Bryssels / MX15
+      [1.817103, 50.93869], // Caalaj / MX16
+      [1.162809, 51.08735], // Folkestone / MX16
+      [-0.11832, 51.50939], // Landán / MX17, MX18
+      [-1.4047, 50.9069], // Saamton / MX19
+      [-3.5, 50.7], // Plymeth / MX20
+      [-4.136, 50.3719], // Plymeth / MX21
+      [-39.88985, 44.01811], // Vulkaninsel / MX23
+      [-74.005833, 40.712778], // Nuu'ork / MX25, MX26
+      [-75.163889, 39.952222], // Phillia / MX27
+      [-77.036667, 38.895], // Waashton / MX28, MX30, MX31
+      [-75.734250, 36.963067], // Hykton / MX32
+      [-77.036667, 38.895000], // Waashton / MX33
+      [-82.5, 31], // Unterwegs zum Kennedy Space Centers / MX36
+      [-80.650833, 28.585278], // Kennedy Space Centers / MX36
+      [32, -1], // Victoriasee / MX599
+      [-77.640383, -6.5], // Peru / MX 600
+      [-78.510556, -7.164444], // Cajamarca
+      [-79.20201, -3.99583], // Loja
+      [-78.11747, -2.30414], // Macas
+      [-76.98699, -0.46623], // Puerto Francisco de Orellana
+      [-78.509722, -0.218611], // Kiito
+      [-75.57376, 6.244735], // Medellín
+      [-77.640383, -6.5], // Peru
+    ],
+  },
+};
+
+// Erstellen Sie einen Puffer um Ihre Route mit der gewünschten Breite (z.B. 10km)
+var routeBuffer = turf.buffer(travelPath, 45, { units: "kilometers" });
+// Schneiden Sie den Puffer aus der Maske aus
+var fogOfWar = turf.difference(mask, routeBuffer);
 
 var map = new mapboxgl.Map({
   container: "map",
@@ -127,36 +196,69 @@ map.on("load", () => {
           "circle-color": "rgba(139,35,35,1)",
         },
       });
-      map.addSource("continents", {
-        type: "geojson",
-        data: continents,
-      });
-      map.addLayer({
-        id: "Kontinent",
-        type: "symbol",
-        source: "continents",
-        layout: {
-          "text-field": ["get", "name"],
-          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-          "text-size": 18,
-        },
-      });
-
-      map.addSource("states", {
-        type: "geojson",
-        data: states,
-      });
-      map.addLayer({
-        id: "Länder",
-        type: "symbol",
-        source: "states",
-        layout: {
-          "text-field": ["get", "name"],
-          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-          "text-size": 14,
-        },
-      });
     });
+  map.addSource("continents", {
+    type: "geojson",
+    data: continents,
+  });
+  map.addLayer({
+    id: "Kontinente",
+    type: "symbol",
+    source: "continents",
+    layout: {
+      "text-field": ["get", "name"],
+      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+      "text-size": 18,
+    },
+  });
+
+  map.addSource("states", {
+    type: "geojson",
+    data: states,
+  });
+  map.addLayer({
+    id: "Länder",
+    type: "symbol",
+    source: "states",
+    layout: {
+      "text-field": ["get", "name"],
+      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+      "text-size": 14,
+    },
+  });
+  // Reiseverlauf hinzufügen
+  map.addSource("travelPath", {
+    type: "geojson",
+    data: travelPath,
+  });
+  map.addLayer({
+    id: "Reiseroute Matt",
+    type: "line",
+    source: "travelPath",
+    layout: {
+      "line-join": "round",
+      "line-cap": "round",
+    },
+    paint: {
+      "line-color": "#ff7f00",
+      "line-width": 3,
+      "line-dasharray": [1, 2], // Erstellt eine gestrichelte Linie
+    },
+  });
+  // Fügen Sie den Fog of War als Layer zur Karte hinzu
+  map.addLayer({
+    id: "Unentdeckte Gebiete",
+    type: "fill",
+    source: {
+      type: "geojson",
+      data: fogOfWar,
+    },
+    layout: {},
+    paint: {
+      "fill-color": "#000", // Die Farbe des Nebels
+      "fill-opacity": 0.75, // Die Transparenz des Nebels
+    },
+  });
 });
 
 map.on("rotate", function () {
@@ -172,7 +274,7 @@ map.on("idle", () => {
   }
 
   // Enumerate ids of the layers.
-  const toggleableLayerIds = ["Ruinenstadt", "Kontinent", "Länder"];
+  const toggleableLayerIds = ["Ruinenstadt", "Kontinente", "Länder", "Reiseroute Matt", "Unentdeckte Gebiete"];
 
   // Set up the corresponding toggle button for each layer.
   for (const id of toggleableLayerIds) {
@@ -228,7 +330,7 @@ map.on("click", "Ruinenstadt", function (e) {
     .addTo(map);
 });
 
-map.on("click", "Kontinent", function (e) {
+map.on("click", "Kontinente", function (e) {
   var url = e.features[0].properties.url; // URL der Wiki-Seite
   window.open(url, "_blank"); // Öffnet die URL in einem neuen Tab
 });
