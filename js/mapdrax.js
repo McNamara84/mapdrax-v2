@@ -110,15 +110,27 @@ var travelPath = {
       [-1.4047, 50.9069], // Saamton / MX19
       [-3.5, 50.7], // Plymeth / MX20
       [-4.136, 50.3719], // Plymeth / MX21
-      [-39.88985, 44.01811], // Vulkaninsel / MX23
+      [-39.88985, 40], // Vulkaninsel / MX23
       [-74.005833, 40.712778], // Nuu'ork / MX25, MX26
       [-75.163889, 39.952222], // Phillia / MX27
       [-77.036667, 38.895], // Waashton / MX28, MX30, MX31
       [-75.734250, 36.963067], // Hykton / MX32
       [-77.036667, 38.895000], // Waashton / MX33
-      [-82.5, 31], // Unterwegs zum Kennedy Space Centers / MX36
-      [-80.650833, 28.585278], // Kennedy Space Centers / MX36
-      [32, -1], // Victoriasee / MX599
+      [-82.5, 31], // Unterwegs zum Kennedy Space Center / MX36
+      [-80.650833, 28.585278], // Kennedy Space Center / MX36
+      [-82.5, 31], // Unterwegs nach Waashton / MX37
+      [-77.036667, 38.895], // Waashton / MX37
+      [-83.942222, 35.972778], // Godswill / MX40
+      [-90.048889, 35.149444], // Memvess / MX41
+      [-101.845000, 35.199167], // Amarillo / MX42
+      [-103.114859, 35.2678831], // New Mexico / MX44
+      [-108.734167, 35.523611], // Gallup / MX45
+      [-115.136389, 36.175000], // Las Vegas / MX46
+      [-117.396111, 33.953333], // Riverside / MX47
+      [-118.243611, 34.052222], // El'ay / MX48
+      [-118.462830, 34.238486], // San Fernando Valley / MX49
+      [-80.650833, 28.585278], // Kennedy Space Center / MX50
+      [32.0, -1.0], // Victoriasee / MX599
       [-77.640383, -6.5], // Peru / MX 600
       [-78.510556, -7.164444], // Cajamarca
       [-79.20201, -3.99583], // Loja
