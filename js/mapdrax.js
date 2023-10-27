@@ -160,6 +160,7 @@ map.on("load", () => {
     layout: {
       "line-join": "round",
       "line-cap": "round",
+      visibility: "none",
     },
     paint: {
       "line-color": "#ff7f00",
@@ -175,7 +176,9 @@ map.on("load", () => {
       type: "geojson",
       data: fogOfWar,
     },
-    layout: {},
+    layout: {
+      visibility: "none", // Layer standardmäßig ausblenden
+    },
     paint: {
       "fill-color": "#000", // Farbe des Nebels
       "fill-opacity": 0.75, // Transparenz des Nebels
