@@ -30,6 +30,59 @@ var map = new mapboxgl.Map({
 
 map.on("load", () => {
   // API-Abfrage durchführen
+  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Länder]]|?Koordinaten&format=json")
+    .then((response) => response.json())
+    .then((data) => {
+      // Erstellen Sie ein leeres GeoJSON-Objekt
+      const geojson = {
+        type: "FeatureCollection",
+        features: [],
+      };
+
+      // Über die Ergebnisse iterieren
+      for (const result of Object.values(data.query.results)) {
+        if (result.printouts.Koordinaten && result.printouts.Koordinaten[0]) {
+          // Koordinaten und Artikelname extrahieren
+          const { lat, lon } = result.printouts.Koordinaten[0];
+
+          // Überprüfe, ob 'lat' und 'lon' definiert sind
+          if (lat !== undefined && lon !== undefined) {
+            const title = result.fulltext;
+            const url = result.fullurl;
+            // ...
+            geojson.features.push({
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [lon, lat],
+              },
+              properties: {
+                title: title,
+                url: url,
+              },
+            });
+          }
+        }
+      }
+
+      // Datenquelle in Karte einfügen
+      map.addSource("Länder", {
+        type: "geojson",
+        data: geojson,
+      });
+
+      // Symbol-Layer zur Karte hinzufügen
+      map.addLayer({
+        id: "Länder",
+        type: "symbol",
+        source: "Länder",
+        layout: {
+          "text-field": ["get", "title"],
+          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+          "text-size": 18,
+        },
+      });
+    });
   fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Städte in Amraka]]|?Koordinaten&format=json")
     .then((response) => response.json())
     .then((data) => {
@@ -95,20 +148,6 @@ map.on("load", () => {
     },
   });
 
-  map.addSource("states", {
-    type: "geojson",
-    data: states,
-  });
-  map.addLayer({
-    id: "Länder",
-    type: "symbol",
-    source: "states",
-    layout: {
-      "text-field": ["get", "name"],
-      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-      "text-size": 14,
-    },
-  });
   // Reiseverlauf hinzufügen
   map.addSource("travelPath", {
     type: "geojson",
@@ -157,7 +196,7 @@ map.on("idle", () => {
   }
 
   // Liste aller Layer für Buttons
-  const toggleableLayerIds = ["Ruinenstadt", "Kontinente", "Länder", "Reiseroute Matt", "Unentdeckte Gebiete"];
+  const toggleableLayerIds = ["Ruinenstadt", "Kontinente", "Reiseroute Matt", "Unentdeckte Gebiete", "Länder"];
 
   // Button für alle Layer erstellen
   for (const id of toggleableLayerIds) {

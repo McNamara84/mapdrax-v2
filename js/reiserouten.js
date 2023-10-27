@@ -1,4 +1,4 @@
-// Reiseroute Matt
+// Reiseroute Matt bis Band 50
 var travelPathEureeMeeraka = {
   type: "Feature",
   properties: {
@@ -48,7 +48,49 @@ var travelPathEureeMeeraka = {
       [-118.243611, 34.052222], // El'ay / MX48
       [-118.46283, 34.238486], // San Fernando Valley / MX49
       [-80.650833, 28.585278], // Kennedy Space Center / MX50
+      //[-101.845, 35.199167], // Amarillo / MX51, MX53
+      //[-118.46283, 34.238486], // San Fernando Valley / MX53, MX54
+      //[-119.79, 36.78], // Fresno / MX57
+      //[-122.419200, 37.779300], // Sub'Sisco / MX58
+      //[32.0, -1.0], // Victoriasee / MX599
+    ],
+  },
+};
+
+// Reiseroute Matt bis Band 50
+var travelPathExpeditionKratersee = {
+  type: "Feature",
+  properties: {
+    name: "Reiseverlauf",
+  },
+  geometry: {
+    type: "LineString",
+    coordinates: [
+      [-101.845, 35.199167], // Amarillo / MX51, MX53
+      [-118.46283, 34.238486], // San Fernando Valley / MX53, MX54
+      [-119.79, 36.78], // Fresno / MX57
+      [-122.4192, 37.7793], // Sub'Sisco / MX58
       [32.0, -1.0], // Victoriasee / MX599
+      [-77.640383, -6.5], // Peru / MX 600
+      [-78.510556, -7.164444], // Cajamarca
+      [-79.20201, -3.99583], // Loja
+      [-78.11747, -2.30414], // Macas
+      [-76.98699, -0.46623], // Puerto Francisco de Orellana
+      [-78.509722, -0.218611], // Kiito
+      [-75.57376, 6.244735], // Medellín
+      [-77.640383, -6.5], // Peru
+    ],
+  },
+};
+
+var travelPathAmraka = {
+  type: "Feature",
+  properties: {
+    name: "Reiseverlauf",
+  },
+  geometry: {
+    type: "LineString",
+    coordinates: [
       [-77.640383, -6.5], // Peru / MX 600
       [-78.510556, -7.164444], // Cajamarca
       [-79.20201, -3.99583], // Loja
