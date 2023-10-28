@@ -30,7 +30,7 @@ var map = new mapboxgl.Map({
 
 map.on("load", () => {
   // API-Abfrage durchführen
-  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Länder]]|?Koordinaten&format=json")
+  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Länder]]|?Koordinaten|limit%3D200&format=json")
     .then((response) => response.json())
     .then((data) => {
       // Erstellen Sie ein leeres GeoJSON-Objekt
@@ -38,7 +38,7 @@ map.on("load", () => {
         type: "FeatureCollection",
         features: [],
       };
-
+      console.debug(data);
       // Über die Ergebnisse iterieren
       for (const result of Object.values(data.query.results)) {
         if (result.printouts.Koordinaten && result.printouts.Koordinaten[0]) {
@@ -79,7 +79,7 @@ map.on("load", () => {
         layout: {
           "text-field": ["get", "title"],
           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-          "text-size": 18,
+          "text-size": 14,
         },
       });
     });
