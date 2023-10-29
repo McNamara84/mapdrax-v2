@@ -29,6 +29,20 @@ var map = new mapboxgl.Map({
 });
 
 map.on("load", () => {
+  map.addSource("Topo", {
+    type: "raster",
+    tiles: ["https://erde.maddraxikon.com/v2/{z}/{x}/{y}.png"],
+    tileSize: 256,
+  });
+
+  map.addLayer({
+    id: "TopoKarte",
+    type: "raster",
+    source: "Topo",
+    layout: {
+      visibility: "none", // Layer standardmäßig ausblenden
+    },
+  });
   // API-Abfrage durchführen
   fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Länder]]|?Koordinaten|limit%3D200&format=json")
     .then((response) => response.json())
@@ -80,6 +94,7 @@ map.on("load", () => {
           "text-field": ["get", "title"],
           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
           "text-size": 14,
+          visibility: "visible",
         },
       });
     });
@@ -125,7 +140,7 @@ map.on("load", () => {
         type: "circle",
         source: "Ruinenstadt",
         layout: {
-          visibility: "visible",
+          visibility: "none",
         },
         paint: {
           "circle-radius": 6,
@@ -145,6 +160,7 @@ map.on("load", () => {
       "text-field": ["get", "name"],
       "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
       "text-size": 18,
+      visibility: "none",
     },
   });
 
@@ -199,7 +215,7 @@ map.on("idle", () => {
   }
 
   // Liste aller Layer für Buttons
-  const toggleableLayerIds = ["Ruinenstadt", "Kontinente", "Reiseroute Matt", "Unentdeckte Gebiete", "Länder"];
+  const toggleableLayerIds = ["Kontinente", "Länder", "Ruinenstadt", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte"];
 
   // Button für alle Layer erstellen
   for (const id of toggleableLayerIds) {
@@ -229,6 +245,14 @@ map.on("idle", () => {
         map.setLayoutProperty(clickedLayer, "visibility", "visible");
       }
     };
+
+    // Setze den anfänglichen Zustand des Buttons basierend auf der Sichtbarkeit des Layers
+    if (map.getLayoutProperty(id, "visibility") === "visible") {
+      link.className = "active";
+    } else {
+      link.className = "";
+    }
+
     const layers = document.getElementById("menu");
     layers.appendChild(link);
   }
