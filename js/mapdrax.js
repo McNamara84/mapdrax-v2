@@ -155,7 +155,7 @@ map.on("load", () => {
           "text-field": ["get", "title"],
           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
           "text-size": 14,
-          visibility: "visible",
+          visibility: "none",
         },
       });
     });
@@ -203,7 +203,7 @@ map.on("load", () => {
         type: "circle",
         source: "Städte",
         layout: {
-          visibility: "none",
+          visibility: "visible",
         },
         paint: {
           "circle-radius": 6,
