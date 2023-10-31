@@ -83,7 +83,7 @@ map.on("load", () => {
           "icon-image": "icon",
           "icon-size": 0.15, // Größe anpassen
           "text-field": ["get", "title"],
-          'text-size': 10,
+          "text-size": 10,
           visibility: "none",
         },
         paint: {
@@ -159,7 +159,9 @@ map.on("load", () => {
         },
       });
     });
-  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Städte in Amraka]]|?Koordinaten&format=json")
+  fetch(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20in%20Amraka]]||[[Kategorie:St%C3%A4dte%20in%20Euree]]|?Koordinaten|limit%3D200&format=json"
+  )
     .then((response) => response.json())
     .then((data) => {
       // Erstellen Sie ein leeres GeoJSON-Objekt
@@ -170,36 +172,36 @@ map.on("load", () => {
 
       // Über die Ergebnisse iterieren
       for (const result of Object.values(data.query.results)) {
-        // Koordinaten und Artikelname extrahieren
-        const { lat, lon } = result.printouts.Koordinaten[0];
-        const title = result.fulltext;
-        const url = result.fullurl;
-
         // Feature zum GeoJSON-Objekt hinzufügen
-        geojson.features.push({
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [lon, lat],
-          },
-          properties: {
-            title: title,
-            url: url,
-          },
-        });
+        if (result.printouts.Koordinaten && result.printouts.Koordinaten.length > 0) {
+          const { lat, lon } = result.printouts.Koordinaten[0];
+          const title = result.fulltext;
+          const url = result.fullurl;
+          geojson.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [lon, lat],
+            },
+            properties: {
+              title: title,
+              url: url,
+            },
+          });
+        }
       }
 
       // Datenquelle in Karte einfügen
-      map.addSource("Ruinenstadt", {
+      map.addSource("Städte", {
         type: "geojson",
         data: geojson,
       });
 
       // Symbol-Layer zur Karte hinzufügen
       map.addLayer({
-        id: "Ruinenstadt",
+        id: "Städte",
         type: "circle",
-        source: "Ruinenstadt",
+        source: "Städte",
         layout: {
           visibility: "none",
         },
@@ -270,13 +272,13 @@ map.on("rotate", function () {
 });
 
 map.on("idle", () => {
-  if (!map.getLayer("Ruinenstadt")) {
-    console.log("Layer Ruinenstadt fehlt");
+  if (!map.getLayer("Städte")) {
+    console.log("Layer Städte fehlt");
     return;
   }
 
   // Liste aller Layer für Buttons
-  const toggleableLayerIds = ["Kontinente", "Länder", "Ruinenstadt", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte", "Handlungsorte"];
+  const toggleableLayerIds = ["Kontinente", "Länder", "Städte", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte", "Handlungsorte"];
 
   // Button für alle Layer erstellen
   for (const id of toggleableLayerIds) {
@@ -322,7 +324,7 @@ map.on("idle", () => {
 map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
 
-map.on("click", "Ruinenstadt", function (e) {
+map.on("click", "Städte", function (e) {
   var coordinates = e.features[0].geometry.coordinates.slice();
   var title = e.features[0].properties.title; // Artikelname
   var url = e.features[0].properties.url;
