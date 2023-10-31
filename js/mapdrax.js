@@ -29,9 +29,71 @@ var map = new mapboxgl.Map({
 });
 
 map.on("load", () => {
+  map.loadImage("./handlungsortIcon.png", (error, image) => {
+    if (error) throw error;
+    map.addImage("icon", image);
+  });
+  // Daten aus JSON-Datei laden
+  fetch("./handlungsorte.json")
+    .then((response) => response.json())
+    .then((data) => {
+      // Leeres GeoJSON-Objekt erstellen
+      const geojson = {
+        type: "FeatureCollection",
+        features: [],
+      };
+
+      // Über die Einträge iterieren
+      Object.keys(data).forEach((key) => {
+        // Koordinaten für diesen Eintrag auslesen
+        const coordinates = data[key];
+
+        // Wenn keine Koordinaten vorhanden, überspringen
+        if (!coordinates.length) return;
+
+        // Für jedes Koordinatenpaar ein Feature erstellen
+        coordinates.forEach((coords) => {
+          geojson.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [coords.lon, coords.lat],
+            },
+            properties: {
+              title: key, // Beschriftung
+            },
+          });
+        });
+      });
+
+      // Quelle und Layer zur Karte hinzufügen
+      map.addSource("handlungsorte", {
+        type: "geojson",
+        data: geojson,
+        cluster: true,
+        clusterMaxZoom: 14, // Max zoom to cluster points on
+        clusterRadius: 50, // Radius of each cluster when clustering points (defaults to 50)
+      });
+
+      map.addLayer({
+        id: "Handlungsorte",
+        type: "symbol",
+        source: "handlungsorte",
+        layout: {
+          "icon-image": "icon",
+          "icon-size": 0.15, // Größe anpassen
+          "text-field": ["get", "title"],
+          'text-size': 10,
+          visibility: "none",
+        },
+        paint: {
+          "text-color": "rgba(255,0,0,1)",
+        },
+      });
+    });
   map.addSource("Topo", {
     type: "raster",
-    tiles: ["https://erde.maddraxikon.com/v2/{z}/{x}/{y}.png"],
+    tiles: ["./v2/{z}/{x}/{y}.png"], // Im Unterordner v2 liegen die neuen Tiles
     tileSize: 256,
   });
 
@@ -52,7 +114,6 @@ map.on("load", () => {
         type: "FeatureCollection",
         features: [],
       };
-      console.debug(data);
       // Über die Ergebnisse iterieren
       for (const result of Object.values(data.query.results)) {
         if (result.printouts.Koordinaten && result.printouts.Koordinaten[0]) {
@@ -215,7 +276,7 @@ map.on("idle", () => {
   }
 
   // Liste aller Layer für Buttons
-  const toggleableLayerIds = ["Kontinente", "Länder", "Ruinenstadt", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte"];
+  const toggleableLayerIds = ["Kontinente", "Länder", "Ruinenstadt", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte", "Handlungsorte"];
 
   // Button für alle Layer erstellen
   for (const id of toggleableLayerIds) {

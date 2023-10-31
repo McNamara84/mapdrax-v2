@@ -1,0 +1,4 @@
+SetEnvIf Origin "^http(s)?://(www\.)?(localhost|mapdraxv2\.maddraxikon\.com)$" AccessControlAllowOrigin=$0
+Header set Access-Control-Allow-Origin %{AccessControlAllowOrigin}e env=AccessControlAllowOrigin
+Header set Access-Control-Allow-Methods "GET,POST,OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type"
