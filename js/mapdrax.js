@@ -33,6 +33,10 @@ map.on("load", () => {
     if (error) throw error;
     map.addImage("icon", image);
   });
+  map.loadImage("./gebirgeIcon.png", (error, image) => {
+    if (error) throw error;
+    map.addImage("gebirgeIcon", image);
+  });
   // Daten aus JSON-Datei laden
   fetch("./handlungsorte.json")
     .then((response) => response.json())
@@ -105,6 +109,63 @@ map.on("load", () => {
       visibility: "none", // Layer standardmäßig ausblenden
     },
   });
+  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Gebirge und Berge]]|?Koordinaten|limit%3D200&format=json")
+    .then((response) => response.json())
+    .then((data) => {
+      // Erstellen Sie ein leeres GeoJSON-Objekt
+      const geojson = {
+        type: "FeatureCollection",
+        features: [],
+      };
+      // Über die Ergebnisse iterieren
+      for (const result of Object.values(data.query.results)) {
+        if (result.printouts.Koordinaten && result.printouts.Koordinaten[0]) {
+          // Koordinaten und Artikelname extrahieren
+          const { lat, lon } = result.printouts.Koordinaten[0];
+
+          // Überprüfe, ob 'lat' und 'lon' definiert sind
+          if (lat !== undefined && lon !== undefined) {
+            const title = result.fulltext;
+            const url = result.fullurl;
+            // ...
+            geojson.features.push({
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [lon, lat],
+              },
+              properties: {
+                title: title,
+                url: url,
+              },
+            });
+          }
+        }
+      }
+
+      // Datenquelle in Karte einfügen
+      map.addSource("Gebirge", {
+        type: "geojson",
+        data: geojson,
+      });
+
+      // Symbol-Layer zur Karte hinzufügen
+      map.addLayer({
+        id: "Gebirge",
+        type: "symbol",
+        source: "Gebirge",
+        layout: {
+          "icon-image": "gebirgeIcon",
+          "icon-size": 0.1, // Größe anpassen
+          //"text-field": ["get", "title"],
+          "text-size": 10,
+          visibility: "none",
+        },
+        paint: {
+          "text-color": "rgba(255,0,0,1)",
+        },
+      });
+    });
   // API-Abfrage durchführen
   fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Länder]]|?Koordinaten|limit%3D200&format=json")
     .then((response) => response.json())
@@ -278,7 +339,7 @@ map.on("idle", () => {
   }
 
   // Liste aller Layer für Buttons
-  const toggleableLayerIds = ["Kontinente", "Länder", "Städte", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte", "Handlungsorte"];
+  const toggleableLayerIds = ["Kontinente", "Länder", "Gebirge", "Städte", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte", "Handlungsorte"];
 
   // Button für alle Layer erstellen
   for (const id of toggleableLayerIds) {
@@ -344,6 +405,11 @@ map.on("click", "Kontinente", function (e) {
 });
 
 map.on("click", "Länder", function (e) {
+  var url = e.features[0].properties.url; // URL der Wiki-Seite
+  window.open(url, "_blank"); // Öffnet die URL in einem neuen Tab
+});
+
+map.on("click", "Gebirge", function (e) {
   var url = e.features[0].properties.url; // URL der Wiki-Seite
   window.open(url, "_blank"); // Öffnet die URL in einem neuen Tab
 });
