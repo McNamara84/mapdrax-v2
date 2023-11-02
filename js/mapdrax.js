@@ -160,7 +160,7 @@ map.on("load", () => {
       });
     });
   fetch(
-    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20in%20Amraka]]||[[Kategorie:St%C3%A4dte%20in%20Euree]]|?Koordinaten|limit%3D200&format=json"
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20in%20Amraka]]||[[Kategorie:St%C3%A4dte%20in%20Euree]]||[[Kategorie:St%C3%A4dte%20in%20Meeraka]]|?Koordinaten|limit%3D300&format=json"
   )
     .then((response) => response.json())
     .then((data) => {
