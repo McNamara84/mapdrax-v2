@@ -15,7 +15,7 @@ var mask = {
 };
 
 // Erstellen Sie einen Puffer um Ihre Route mit der gewünschten Breite (z.B. 10km)
-var routeBuffer = turf.buffer(travelPathEureeMeeraka, 45, { units: "kilometers" });
+var routeBuffer = turf.buffer(travelPathEuree, 45, { units: "kilometers" });
 // Schneiden Sie den Puffer aus der Maske aus
 var fogOfWar = turf.difference(mask, routeBuffer);
 
@@ -264,7 +264,7 @@ map.on("load", () => {
         type: "circle",
         source: "Städte",
         layout: {
-          visibility: "visible",
+          visibility: "none",
         },
         paint: {
           "circle-radius": 6,
@@ -272,6 +272,7 @@ map.on("load", () => {
         },
       });
     });
+  
   map.addSource("continents", {
     type: "geojson",
     data: continents,
@@ -289,23 +290,100 @@ map.on("load", () => {
   });
 
   // Reiseverlauf hinzufügen
-  map.addSource("travelPath", {
+  // GRÜN #688000 #7b8000 #8f8000 #a28000 #b68000 #c98000 #dd8000 #f08000 #ff8000 #ff8c00 #ff9900 #ffa500 #ffb200 #ffbf00 #ffcb00 #ffd800 #ffe400 #fff000 #fffc00 #ffff00  ROT
+  map.addSource("travelPathEuree", {
     type: "geojson",
-    data: travelPathEureeMeeraka,
+    data: travelPathEuree,
   });
   map.addLayer({
-    id: "Reiseroute Matt",
+    id: "Reiseroute Euree-Zyklus",
     type: "line",
-    source: "travelPath",
+    source: "travelPathEuree",
     layout: {
       "line-join": "round",
       "line-cap": "round",
       visibility: "none",
     },
     paint: {
-      "line-color": "#ff7f00",
+      "line-color": "#008000",
       "line-width": 3,
-      "line-dasharray": [1, 2], // Erstellt eine gestrichelte Linie
+      "line-dasharray": [1, 2],
+    },
+  });
+  map.addSource("travelPathMeeraka", {
+    type: "geojson",
+    data: travelPathMeeraka,
+  });
+  map.addLayer({
+    id: "Reiseroute Meeraka-Zyklus",
+    type: "line",
+    source: "travelPathMeeraka",
+    layout: {
+      "line-join": "round",
+      "line-cap": "round",
+      visibility: "none",
+    },
+    paint: {
+      "line-color": "#1a8000",
+      "line-width": 3,
+      "line-dasharray": [1, 2],
+    },
+  });
+  map.addSource("travelPathExpedition", {
+    type: "geojson",
+    data: travelPathExpedition,
+  });
+  map.addLayer({
+    id: "Reiseroute Expedition-Zyklus",
+    type: "line",
+    source: "travelPathExpedition",
+    layout: {
+      "line-join": "round",
+      "line-cap": "round",
+      visibility: "none",
+    },
+    paint: {
+      "line-color": "#2d8000",
+      "line-width": 3,
+      "line-dasharray": [1, 2],
+    },
+  });
+  map.addSource("travelPathKratersee", {
+    type: "geojson",
+    data: travelPathKratersee,
+  });
+  map.addLayer({
+    id: "Reiseroute Kratersee-Zyklus",
+    type: "line",
+    source: "travelPathKratersee",
+    layout: {
+      "line-join": "round",
+      "line-cap": "round",
+      visibility: "none",
+    },
+    paint: {
+      "line-color": "#418000",
+      "line-width": 3,
+      "line-dasharray": [1, 2],
+    },
+  });
+  map.addSource("travelPathDaamuren", {
+    type: "geojson",
+    data: travelPathDaamuren,
+  });
+  map.addLayer({
+    id: "Reiseroute Daa'muren-Zyklus",
+    type: "line",
+    source: "travelPathDaamuren",
+    layout: {
+      "line-join": "round",
+      "line-cap": "round",
+      visibility: "visible",
+    },
+    paint: {
+      "line-color": "#548000",
+      "line-width": 3,
+      "line-dasharray": [1, 2],
     },
   });
   // Fog of War als Layer zur Karte hinzufügen
@@ -339,7 +417,20 @@ map.on("idle", () => {
   }
 
   // Liste aller Layer für Buttons
-  const toggleableLayerIds = ["Kontinente", "Länder", "Gebirge", "Städte", "Reiseroute Matt", "Unentdeckte Gebiete", "TopoKarte", "Handlungsorte"];
+  const toggleableLayerIds = [
+    "Kontinente",
+    "Länder",
+    "Gebirge",
+    "Städte",
+    "Reiseroute Euree-Zyklus",
+    "Reiseroute Meeraka-Zyklus",
+    "Reiseroute Expedition-Zyklus",
+    "Reiseroute Kratersee-Zyklus",
+    "Reiseroute Daa'muren-Zyklus",
+    "Unentdeckte Gebiete",
+    "TopoKarte",
+    "Handlungsorte",
+  ];
 
   // Button für alle Layer erstellen
   for (const id of toggleableLayerIds) {
@@ -413,3 +504,24 @@ map.on("click", "Gebirge", function (e) {
   var url = e.features[0].properties.url; // URL der Wiki-Seite
   window.open(url, "_blank"); // Öffnet die URL in einem neuen Tab
 });
+
+////////////////////// Koordinaten-Debugging //////////////////
+/*const marker = new mapboxgl.Marker({
+  draggable: true,
+})
+  .setLngLat([0, 0])
+  .addTo(map);
+const popup = new mapboxgl.Popup({
+  closeButton: false,
+  closeOnClick: false,
+});
+marker.on("drag", () => {
+  const lngLat = marker.getLngLat();
+  popup
+    .setHTML(`Koordinaten: ${lngLat.lng.toFixed(4)}, ${lngLat.lat.toFixed(4)}`)
+    .setLngLat(lngLat)
+    .addTo(map);
+});
+marker.on("click", () => {
+  popup.addTo(map);
+});*/
