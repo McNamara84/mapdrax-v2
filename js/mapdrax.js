@@ -288,7 +288,58 @@ map.on("load", () => {
       visibility: "none",
     },
   });
+  fetch(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Bunker]]|?Koordinaten|limit%3D400&format=json"
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      // Erstellen Sie ein leeres GeoJSON-Objekt
+      const geojson = {
+        type: "FeatureCollection",
+        features: [],
+      };
 
+      // Über die Ergebnisse iterieren
+      for (const result of Object.values(data.query.results)) {
+        // Feature zum GeoJSON-Objekt hinzufügen
+        if (result.printouts.Koordinaten && result.printouts.Koordinaten.length > 0) {
+          const { lat, lon } = result.printouts.Koordinaten[0];
+          const title = result.fulltext;
+          const url = result.fullurl;
+          geojson.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [lon, lat],
+            },
+            properties: {
+              title: title,
+              url: url,
+            },
+          });
+        }
+      }
+
+      // Datenquelle in Karte einfügen
+      map.addSource("Bunker", {
+        type: "geojson",
+        data: geojson,
+      });
+
+      // Symbol-Layer zur Karte hinzufügen
+      map.addLayer({
+        id: "Bunker",
+        type: "circle",
+        source: "Bunker",
+        layout: {
+          visibility: "visible",
+        },
+        paint: {
+          "circle-radius": 3,
+          "circle-color": "rgba(0,255,0,1)",
+        },
+      });
+    });
   // Reiseverlauf hinzufügen
   // GRÜN #688000 #7b8000 #8f8000 #a28000 #b68000 #c98000 #dd8000 #f08000 #ff8000 #ff8c00 #ff9900 #ffa500 #ffb200 #ffbf00 #ffcb00 #ffd800 #ffe400 #fff000 #fffc00 #ffff00  ROT
   map.addSource("travelPathEuree", {
