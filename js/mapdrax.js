@@ -37,6 +37,10 @@ map.on("load", () => {
     if (error) throw error;
     map.addImage("gebirgeIcon", image);
   });
+  map.loadImage("./bunkerIcon.png", (error, image) => {
+    if (error) throw error;
+    map.addImage("bunkerIcon", image);
+  });
   // Daten aus JSON-Datei laden
   fetch("./handlungsorte.json")
     .then((response) => response.json())
@@ -329,14 +333,17 @@ map.on("load", () => {
       // Symbol-Layer zur Karte hinzufügen
       map.addLayer({
         id: "Bunker",
-        type: "circle",
+        type: "symbol",
         source: "Bunker",
         layout: {
+          "icon-image": "bunkerIcon",
+          "icon-size": 0.2, // Größe anpassen
+          //"text-field": ["get", "title"],
+          "text-size": 10,
           visibility: "visible",
         },
         paint: {
-          "circle-radius": 3,
-          "circle-color": "rgba(0,255,0,1)",
+          "text-color": "rgba(255,0,0,1)",
         },
       });
     });
@@ -429,7 +436,7 @@ map.on("load", () => {
     layout: {
       "line-join": "round",
       "line-cap": "round",
-      visibility: "visible",
+      visibility: "none",
     },
     paint: {
       "line-color": "#548000",
@@ -481,6 +488,7 @@ map.on("idle", () => {
     "Unentdeckte Gebiete",
     "TopoKarte",
     "Handlungsorte",
+    "Bunker",
   ];
 
   // Button für alle Layer erstellen
@@ -528,6 +536,20 @@ map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
 
 map.on("click", "Städte", function (e) {
+  var coordinates = e.features[0].geometry.coordinates.slice();
+  var title = e.features[0].properties.title; // Artikelname
+  var url = e.features[0].properties.url;
+  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+  }
+
+  new mapboxgl.Popup()
+    .setLngLat(coordinates)
+    .setHTML("<h3>" + title + '</h3><p><a href="' + url + '" target="_blank">Link zum Wiki</a></p>')
+    .addTo(map);
+});
+
+map.on("click", "Bunker", function (e) {
   var coordinates = e.features[0].geometry.coordinates.slice();
   var title = e.features[0].properties.title; // Artikelname
   var url = e.features[0].properties.url;
