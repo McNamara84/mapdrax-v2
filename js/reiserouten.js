@@ -51,6 +51,7 @@ var travelPathMeeraka = {
       [-80.650833, 28.585278], // Kennedy Space Center / MX36
       [-82.5, 31], // Unterwegs nach Waashton / MX37
       [-77.036667, 38.895], // Waashton / MX37
+      [-80.73200871677884, 36.63124907895767], // Fort Clark / MX39
       [-83.942222, 35.972778], // Godswill / MX40
       [-90.048889, 35.149444], // Memvess / MX41
       [-101.845, 35.199167], // Amarillo / MX42

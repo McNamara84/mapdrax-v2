@@ -41,6 +41,10 @@ map.on("load", () => {
     if (error) throw error;
     map.addImage("bunkerIcon", image);
   });
+  map.loadImage("./hydritIcon.png", (error, image) => {
+    if (error) throw error;
+    map.addImage("hydritIcon", image);
+  });
   // Daten aus JSON-Datei laden
   fetch("./handlungsorte.json")
     .then((response) => response.json())
@@ -276,7 +280,7 @@ map.on("load", () => {
         },
       });
     });
-  
+
   map.addSource("continents", {
     type: "geojson",
     data: continents,
@@ -292,9 +296,60 @@ map.on("load", () => {
       visibility: "none",
     },
   });
-  fetch(
-    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Bunker]]|?Koordinaten|limit%3D400&format=json"
-  )
+  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20der%20Hydriten]]|?Koordinaten|limit%3D400&format=json")
+    .then((response) => response.json())
+    .then((data) => {
+      // Erstellen Sie ein leeres GeoJSON-Objekt
+      const geojson = {
+        type: "FeatureCollection",
+        features: [],
+      };
+
+      // Über die Ergebnisse iterieren
+      for (const result of Object.values(data.query.results)) {
+        // Feature zum GeoJSON-Objekt hinzufügen
+        if (result.printouts.Koordinaten && result.printouts.Koordinaten.length > 0) {
+          const { lat, lon } = result.printouts.Koordinaten[0];
+          const title = result.fulltext;
+          const url = result.fullurl;
+          geojson.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [lon, lat],
+            },
+            properties: {
+              title: title,
+              url: url,
+            },
+          });
+        }
+      }
+
+      // Datenquelle in Karte einfügen
+      map.addSource("Hydritenstädte", {
+        type: "geojson",
+        data: geojson,
+      });
+
+      // Symbol-Layer zur Karte hinzufügen
+      map.addLayer({
+        id: "Hydritenstädte",
+        type: "symbol",
+        source: "Hydritenstädte",
+        layout: {
+          "icon-image": "hydritIcon",
+          "icon-size": 0.25, // Größe anpassen
+          //"text-field": ["get", "title"],
+          "text-size": 10,
+          visibility: "visible",
+        },
+        paint: {
+          "text-color": "rgba(255,0,0,1)",
+        },
+      });
+    });
+  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Bunker]]|?Koordinaten|limit%3D400&format=json")
     .then((response) => response.json())
     .then((data) => {
       // Erstellen Sie ein leeres GeoJSON-Objekt
@@ -340,7 +395,7 @@ map.on("load", () => {
           "icon-size": 0.2, // Größe anpassen
           //"text-field": ["get", "title"],
           "text-size": 10,
-          visibility: "visible",
+          visibility: "none",
         },
         paint: {
           "text-color": "rgba(255,0,0,1)",
@@ -480,6 +535,8 @@ map.on("idle", () => {
     "Länder",
     "Gebirge",
     "Städte",
+    "Bunker",
+    "Hydritenstädte",
     "Reiseroute Euree-Zyklus",
     "Reiseroute Meeraka-Zyklus",
     "Reiseroute Expedition-Zyklus",
@@ -488,7 +545,6 @@ map.on("idle", () => {
     "Unentdeckte Gebiete",
     "TopoKarte",
     "Handlungsorte",
-    "Bunker",
   ];
 
   // Button für alle Layer erstellen
