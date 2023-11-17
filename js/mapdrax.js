@@ -45,6 +45,10 @@ map.on("load", () => {
     if (error) throw error;
     map.addImage("hydritIcon", image);
   });
+  map.loadImage("./ruinenstadtIcon.png", (error, image) => {
+    if (error) throw error;
+    map.addImage("ruinenstadtIcon", image);
+  });
   // Daten aus JSON-Datei laden
   fetch("./handlungsorte.json")
     .then((response) => response.json())
@@ -269,14 +273,18 @@ map.on("load", () => {
       // Symbol-Layer zur Karte hinzufügen
       map.addLayer({
         id: "Städte",
-        type: "circle",
+        type: "symbol",
         source: "Städte",
         layout: {
+          "icon-image": "ruinenstadtIcon",
+          "icon-offset": [0,-128],
+          "icon-size": 0.15, // Größe anpassen
+          //"text-field": ["get", "title"],
+          "text-size": 10,
           visibility: "none",
         },
         paint: {
-          "circle-radius": 6,
-          "circle-color": "rgba(139,35,35,1)",
+          "text-color": "rgba(255,0,0,1)",
         },
       });
     });
