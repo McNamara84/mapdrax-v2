@@ -1,5 +1,14 @@
 mapboxgl.accessToken = "pk.eyJ1Ijoic2FpbGZpc2hlcyIsImEiOiJja2ZvYW8zZGEwY3hwMzJ0YWM5bmZrZnBpIn0.TNIlKhnJwqVDiS4dkNMpWg";
 var newAxis = -30;
+
+// Funktion zum Laden von Bildern
+function loadImage(imageUrl, iconId) {
+  map.loadImage(imageUrl, (error, image) => {
+    if (error) throw error;
+    map.addImage(iconId, image);
+  });
+}
+
 // Karte komplett abdecken für "Fog of War"
 var mask = {
   type: "Polygon",
@@ -29,26 +38,12 @@ var map = new mapboxgl.Map({
 });
 
 map.on("load", () => {
-  map.loadImage("./handlungsortIcon.png", (error, image) => {
-    if (error) throw error;
-    map.addImage("icon", image);
-  });
-  map.loadImage("./gebirgeIcon.png", (error, image) => {
-    if (error) throw error;
-    map.addImage("gebirgeIcon", image);
-  });
-  map.loadImage("./bunkerIcon.png", (error, image) => {
-    if (error) throw error;
-    map.addImage("bunkerIcon", image);
-  });
-  map.loadImage("./hydritIcon.png", (error, image) => {
-    if (error) throw error;
-    map.addImage("hydritIcon", image);
-  });
-  map.loadImage("./ruinenstadtIcon.png", (error, image) => {
-    if (error) throw error;
-    map.addImage("ruinenstadtIcon", image);
-  });
+  // Bilder laden
+  loadImage("./handlungsortIcon.png", "icon");
+  loadImage("./gebirgeIcon.png", "gebirgeIcon");
+  loadImage("./bunkerIcon.png", "bunkerIcon");
+  loadImage("./hydritIcon.png", "hydritIcon");
+  loadImage("./ruinenstadtIcon.png", "ruinenstadtIcon");
   // Daten aus JSON-Datei laden
   fetch("./handlungsorte.json")
     .then((response) => response.json())
@@ -277,7 +272,7 @@ map.on("load", () => {
         source: "Städte",
         layout: {
           "icon-image": "ruinenstadtIcon",
-          "icon-offset": [0,-128],
+          "icon-offset": [0, -128],
           "icon-size": 0.15, // Größe anpassen
           //"text-field": ["get", "title"],
           "text-size": 10,
