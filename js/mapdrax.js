@@ -619,6 +619,20 @@ map.on("click", "Bunker", function (e) {
     .addTo(map);
 });
 
+map.on("click", "Hydritenstädte", function (e) {
+  var coordinates = e.features[0].geometry.coordinates.slice();
+  var title = e.features[0].properties.title; // Artikelname
+  var url = e.features[0].properties.url;
+  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+  }
+
+  new mapboxgl.Popup()
+    .setLngLat(coordinates)
+    .setHTML("<h3>" + title + '</h3><p><a href="' + url + '" target="_blank">Link zum Wiki</a></p>')
+    .addTo(map);
+});
+
 map.on("click", "Kontinente", function (e) {
   var url = e.features[0].properties.url; // URL der Wiki-Seite
   window.open(url, "_blank"); // Öffnet die URL in einem neuen Tab
