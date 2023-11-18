@@ -9,6 +9,69 @@ function loadImage(imageUrl, iconId) {
   });
 }
 
+// Funktion zum Erstellen eines GeoJSON-Objekts
+function createGeoJSON(data) {
+  const geojson = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  for (const result of Object.values(data.query.results)) {
+    if (result.printouts.Koordinaten && result.printouts.Koordinaten[0]) {
+      const { lat, lon } = result.printouts.Koordinaten[0];
+      if (lat !== undefined && lon !== undefined) {
+        geojson.features.push({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [lon, lat],
+          },
+          properties: {
+            title: result.fulltext,
+            url: result.fullurl,
+          },
+        });
+      }
+    }
+  }
+  return geojson;
+}
+
+// Funktion zum Abrufen von Daten und Hinzufügen von Quellen und Layern
+function fetchDataAndAddLayer(url, sourceId, iconId, displayType, textSize, textColor, iconOffsetY) {
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      const geojson = createGeoJSON(data);
+      map.addSource(sourceId, { type: "geojson", data: geojson });
+
+      const layoutProperties = {
+        visibility: "none",
+      };
+      const paintProperties = {};
+
+      // Bestimmen, ob Icons, Text oder beides angezeigt werden soll
+      if (displayType === "icon" || displayType === "both") {
+        layoutProperties["icon-image"] = iconId;
+        layoutProperties["icon-size"] = 0.15;
+        layoutProperties["icon-offset"] = [0, iconOffsetY || 0]; // Standard-Offset, falls nicht angegeben
+      }
+      if (displayType === "text" || displayType === "both") {
+        layoutProperties["text-field"] = ["get", "title"];
+        layoutProperties["text-size"] = textSize || 10; // Standardgröße, falls nicht angegeben
+        paintProperties["text-color"] = textColor || "rgba(255,0,0,1)"; // Standardfarbe, falls nicht angegeben
+      }
+
+      map.addLayer({
+        id: sourceId,
+        type: "symbol",
+        source: sourceId,
+        layout: layoutProperties,
+        paint: paintProperties,
+      });
+    });
+}
+
 // Karte komplett abdecken für "Fog of War"
 var mask = {
   type: "Polygon",
@@ -44,6 +107,7 @@ map.on("load", () => {
   loadImage("./bunkerIcon.png", "bunkerIcon");
   loadImage("./hydritIcon.png", "hydritIcon");
   loadImage("./ruinenstadtIcon.png", "ruinenstadtIcon");
+  loadImage("./wolkenstadtIcon.png", "wolkenstadtIcon");
   // Daten aus JSON-Datei laden
   fetch("./handlungsorte.json")
     .then((response) => response.json())
@@ -116,174 +180,6 @@ map.on("load", () => {
       visibility: "none", // Layer standardmäßig ausblenden
     },
   });
-  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Gebirge und Berge]]|?Koordinaten|limit%3D200&format=json")
-    .then((response) => response.json())
-    .then((data) => {
-      // Erstellen Sie ein leeres GeoJSON-Objekt
-      const geojson = {
-        type: "FeatureCollection",
-        features: [],
-      };
-      // Über die Ergebnisse iterieren
-      for (const result of Object.values(data.query.results)) {
-        if (result.printouts.Koordinaten && result.printouts.Koordinaten[0]) {
-          // Koordinaten und Artikelname extrahieren
-          const { lat, lon } = result.printouts.Koordinaten[0];
-
-          // Überprüfe, ob 'lat' und 'lon' definiert sind
-          if (lat !== undefined && lon !== undefined) {
-            const title = result.fulltext;
-            const url = result.fullurl;
-            // ...
-            geojson.features.push({
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [lon, lat],
-              },
-              properties: {
-                title: title,
-                url: url,
-              },
-            });
-          }
-        }
-      }
-
-      // Datenquelle in Karte einfügen
-      map.addSource("Gebirge", {
-        type: "geojson",
-        data: geojson,
-      });
-
-      // Symbol-Layer zur Karte hinzufügen
-      map.addLayer({
-        id: "Gebirge",
-        type: "symbol",
-        source: "Gebirge",
-        layout: {
-          "icon-image": "gebirgeIcon",
-          "icon-size": 0.1, // Größe anpassen
-          //"text-field": ["get", "title"],
-          "text-size": 10,
-          visibility: "none",
-        },
-        paint: {
-          "text-color": "rgba(255,0,0,1)",
-        },
-      });
-    });
-  // API-Abfrage durchführen
-  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Länder]]|?Koordinaten|limit%3D200&format=json")
-    .then((response) => response.json())
-    .then((data) => {
-      // Erstellen Sie ein leeres GeoJSON-Objekt
-      const geojson = {
-        type: "FeatureCollection",
-        features: [],
-      };
-      // Über die Ergebnisse iterieren
-      for (const result of Object.values(data.query.results)) {
-        if (result.printouts.Koordinaten && result.printouts.Koordinaten[0]) {
-          // Koordinaten und Artikelname extrahieren
-          const { lat, lon } = result.printouts.Koordinaten[0];
-
-          // Überprüfe, ob 'lat' und 'lon' definiert sind
-          if (lat !== undefined && lon !== undefined) {
-            const title = result.fulltext;
-            const url = result.fullurl;
-            // ...
-            geojson.features.push({
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [lon, lat],
-              },
-              properties: {
-                title: title,
-                url: url,
-              },
-            });
-          }
-        }
-      }
-
-      // Datenquelle in Karte einfügen
-      map.addSource("Länder", {
-        type: "geojson",
-        data: geojson,
-      });
-
-      // Symbol-Layer zur Karte hinzufügen
-      map.addLayer({
-        id: "Länder",
-        type: "symbol",
-        source: "Länder",
-        layout: {
-          "text-field": ["get", "title"],
-          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-          "text-size": 14,
-          visibility: "none",
-        },
-      });
-    });
-  fetch(
-    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20in%20Amraka]]||[[Kategorie:St%C3%A4dte%20in%20Ausala]]||[[Kategorie:St%C3%A4dte%20in%20Euree]]||[[Kategorie:St%C3%A4dte%20in%20Meeraka]]||[[Kategorie:St%C3%A4dte%20in%20Aiaa]]||[[Kategorie:St%C3%A4dte%20in%20Afra]]||[[Kategorie:St%C3%A4dte%20in%20der%20Antakis]]|?Koordinaten|limit%3D400&format=json"
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      // Erstellen Sie ein leeres GeoJSON-Objekt
-      const geojson = {
-        type: "FeatureCollection",
-        features: [],
-      };
-
-      // Über die Ergebnisse iterieren
-      for (const result of Object.values(data.query.results)) {
-        // Feature zum GeoJSON-Objekt hinzufügen
-        if (result.printouts.Koordinaten && result.printouts.Koordinaten.length > 0) {
-          const { lat, lon } = result.printouts.Koordinaten[0];
-          const title = result.fulltext;
-          const url = result.fullurl;
-          geojson.features.push({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [lon, lat],
-            },
-            properties: {
-              title: title,
-              url: url,
-            },
-          });
-        }
-      }
-
-      // Datenquelle in Karte einfügen
-      map.addSource("Städte", {
-        type: "geojson",
-        data: geojson,
-      });
-
-      // Symbol-Layer zur Karte hinzufügen
-      map.addLayer({
-        id: "Städte",
-        type: "symbol",
-        source: "Städte",
-        layout: {
-          "icon-image": "ruinenstadtIcon",
-          "icon-offset": [0, -128],
-          "icon-size": 0.15, // Größe anpassen
-          //"text-field": ["get", "title"],
-          "text-size": 10,
-          visibility: "none",
-        },
-        paint: {
-          "text-color": "rgba(255,0,0,1)",
-        },
-      });
-    });
-
   map.addSource("continents", {
     type: "geojson",
     data: continents,
@@ -299,112 +195,49 @@ map.on("load", () => {
       visibility: "none",
     },
   });
-  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20der%20Hydriten]]|?Koordinaten|limit%3D400&format=json")
-    .then((response) => response.json())
-    .then((data) => {
-      // Erstellen Sie ein leeres GeoJSON-Objekt
-      const geojson = {
-        type: "FeatureCollection",
-        features: [],
-      };
+  // API-Abfrage durchführen
+  fetchDataAndAddLayer(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Gebirge%20und%20Berge]]|?Koordinaten|limit%3D200&format=json",
+    "Gebirge",
+    "gebirgeIcon",
+    "text"
+  );
+  fetchDataAndAddLayer(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Länder]]|?Koordinaten|limit%3D200&format=json",
+    "Länder",
+    "gebirgeIcon",
+    "text"
+  );
+  fetchDataAndAddLayer(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20in%20Amraka]]||[[Kategorie:St%C3%A4dte%20in%20Ausala]]||[[Kategorie:St%C3%A4dte%20in%20Euree]]||[[Kategorie:St%C3%A4dte%20in%20Meeraka]]||[[Kategorie:St%C3%A4dte%20in%20Aiaa]]||[[Kategorie:St%C3%A4dte%20in%20Afra]]||[[Kategorie:St%C3%A4dte%20in%20der%20Antakis]]|?Koordinaten|limit%3D400&format=json",
+    "Städte",
+    "ruinenstadtIcon",
+    "icon",
+    null,
+    null,
+    -128
+  );
+  fetchDataAndAddLayer(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Wolkenst%C3%A4dte]]|?Koordinaten|limit%3D400&format=json",
+    "Wolkenstädte",
+    "wolkenstadtIcon",
+    "icon"
+  );
 
-      // Über die Ergebnisse iterieren
-      for (const result of Object.values(data.query.results)) {
-        // Feature zum GeoJSON-Objekt hinzufügen
-        if (result.printouts.Koordinaten && result.printouts.Koordinaten.length > 0) {
-          const { lat, lon } = result.printouts.Koordinaten[0];
-          const title = result.fulltext;
-          const url = result.fullurl;
-          geojson.features.push({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [lon, lat],
-            },
-            properties: {
-              title: title,
-              url: url,
-            },
-          });
-        }
-      }
+  fetchDataAndAddLayer(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:St%C3%A4dte%20der%20Hydriten]]|?Koordinaten|limit%3D400&format=json",
+    "Hydritenstädte",
+    "hydritIcon",
+    "icon"
+  );
 
-      // Datenquelle in Karte einfügen
-      map.addSource("Hydritenstädte", {
-        type: "geojson",
-        data: geojson,
-      });
+  fetchDataAndAddLayer(
+    "https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Bunker]]|?Koordinaten|limit%3D400&format=json",
+    "Bunker",
+    "bunkerIcon",
+    "icon"
+  );
 
-      // Symbol-Layer zur Karte hinzufügen
-      map.addLayer({
-        id: "Hydritenstädte",
-        type: "symbol",
-        source: "Hydritenstädte",
-        layout: {
-          "icon-image": "hydritIcon",
-          "icon-size": 0.25, // Größe anpassen
-          //"text-field": ["get", "title"],
-          "text-size": 10,
-          visibility: "visible",
-        },
-        paint: {
-          "text-color": "rgba(255,0,0,1)",
-        },
-      });
-    });
-  fetch("https://de.maddraxikon.com/api.php?action=ask&query=[[Kategorie:Bunker]]|?Koordinaten|limit%3D400&format=json")
-    .then((response) => response.json())
-    .then((data) => {
-      // Erstellen Sie ein leeres GeoJSON-Objekt
-      const geojson = {
-        type: "FeatureCollection",
-        features: [],
-      };
-
-      // Über die Ergebnisse iterieren
-      for (const result of Object.values(data.query.results)) {
-        // Feature zum GeoJSON-Objekt hinzufügen
-        if (result.printouts.Koordinaten && result.printouts.Koordinaten.length > 0) {
-          const { lat, lon } = result.printouts.Koordinaten[0];
-          const title = result.fulltext;
-          const url = result.fullurl;
-          geojson.features.push({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [lon, lat],
-            },
-            properties: {
-              title: title,
-              url: url,
-            },
-          });
-        }
-      }
-
-      // Datenquelle in Karte einfügen
-      map.addSource("Bunker", {
-        type: "geojson",
-        data: geojson,
-      });
-
-      // Symbol-Layer zur Karte hinzufügen
-      map.addLayer({
-        id: "Bunker",
-        type: "symbol",
-        source: "Bunker",
-        layout: {
-          "icon-image": "bunkerIcon",
-          "icon-size": 0.2, // Größe anpassen
-          //"text-field": ["get", "title"],
-          "text-size": 10,
-          visibility: "none",
-        },
-        paint: {
-          "text-color": "rgba(255,0,0,1)",
-        },
-      });
-    });
   // Reiseverlauf hinzufügen
   // GRÜN #688000 #7b8000 #8f8000 #a28000 #b68000 #c98000 #dd8000 #f08000 #ff8000 #ff8c00 #ff9900 #ffa500 #ffb200 #ffbf00 #ffcb00 #ffd800 #ffe400 #fff000 #fffc00 #ffff00  ROT
   map.addSource("travelPathEuree", {
@@ -540,6 +373,7 @@ map.on("idle", () => {
     "Städte",
     "Bunker",
     "Hydritenstädte",
+    "Wolkenstädte",
     "Reiseroute Euree-Zyklus",
     "Reiseroute Meeraka-Zyklus",
     "Reiseroute Expedition-Zyklus",
