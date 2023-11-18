@@ -335,6 +335,25 @@ map.on("load", () => {
       "line-dasharray": [1, 2],
     },
   });
+  map.addSource("travelPathWandler", {
+    type: "geojson",
+    data: travelPathWandler,
+  });
+  map.addLayer({
+    id: "Reiseroute Wandler-Zyklus",
+    type: "line",
+    source: "travelPathWandler",
+    layout: {
+      "line-join": "round",
+      "line-cap": "round",
+      visibility: "none",
+    },
+    paint: {
+      "line-color": "#548000",
+      "line-width": 3,
+      "line-dasharray": [1, 2],
+    },
+  });
   // Fog of War als Layer zur Karte hinzufügen
   map.addLayer({
     id: "Unentdeckte Gebiete",
@@ -379,6 +398,7 @@ map.on("idle", () => {
     "Reiseroute Expedition-Zyklus",
     "Reiseroute Kratersee-Zyklus",
     "Reiseroute Daa'muren-Zyklus",
+    "Reiseroute Wandler-Zyklus",
     "Unentdeckte Gebiete",
     "TopoKarte",
     "Handlungsorte",

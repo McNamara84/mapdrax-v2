@@ -148,6 +148,32 @@ var travelPathDaamuren = {
   },
 };
 
+// Reiseroute Matt bis Band 124
+var travelPathWandler = {
+  type: "Feature",
+  properties: {
+    name: "Reiseverlauf Wandler-Zyklus",
+  },
+  geometry: {
+    type: "LineString",
+    coordinates: [
+      [-0.11832, 51.50939], // London / MX125
+      [-2.72468420033478, 55.164070691306755], // Verbotenes Land / MX 126
+      [1.840217, 53.743833], // Vernon / MX 129
+      [71.23919692917, 51.14268332856136], // Westliches Ufer des Kratersees / MX 130
+      [-5.353333, 36.138333], // Gibraltar / MX 133
+      [13.408333, 52.518611], // Beelinn / MX135
+      [24.791667, 46.220556], // Schäßburg / MX136
+      [-1.644167, 42.818333], // Pamplona / MX138
+      [139.774444, 35.683889], // Tokio / MX140
+      [35.924167, 56.862500], // Tver / MX142
+      [34.9310, 56.5085], // Tver / MX142
+      [-0.11832, 51.50939], // London / MX147
+      [-101.845, 35.199167], // Amarillo / MX148
+    ],
+  },
+};
+
 /*
 var travelPathAmraka = {
   type: "Feature",
